@@ -1,0 +1,76 @@
+\section{莫比乌斯反演}
+		\par $F$是已知函数，$f$是未知函数。$\mu(x)$是固定函数，即\textbf{莫比乌斯函数}。
+		\subsection{莫比乌斯函数$\mu(x)$}
+			\begin{itemize}
+				\item $\mu(1)=1$
+				\item x为不同的质数的乘积。若质数个数为奇数，则$\mu(x)=-1$; 偶数个$\mu(x)=1$.
+				\item 剩下的情况，即x的某个素因子的次数大于等于2. $\mu(x)=0$.
+			\end{itemize}
+			\par 莫比乌斯函是积性函数，$10^7$规模的数据，故可用\textbf{线性筛思想}解决，否则需要使用杜教筛。
+			%code block
+			\begin{lstlisting}[language={c++}]
+// 计算所有的\mu(x) x in [1..n]. 线性复杂度。
+void get_all_mu(int n, vector<int>&mu) {
+  mu.resize(n+1);
+  vector<bool>is_prime(n+1, true);
+  vector<int>prime;
+  is_prime[1] = is_prime[0] = false; mu[1] = 1;
+  for (int i = 2; i <= n; ++i) {
+    if (is_prime[i]) {
+      prime.push_back(i);
+      mu[i] = -1;
+    }
+    for (auto p : prime) {
+      if (i*p > n) break;
+      is_prime[i*p] = false;
+      if (i%p) {
+        mu[i*p] = -mu[i]; // i不具有素因子p，具有积性
+      } else {
+        mu[i*p] = 0; // i具有素因子p,则i*p具有素因子的平方的因子
+        break; // 保证每个数只被最小素因子访问到。
+      }
+    }
+  }
+}
+			\end{lstlisting}
+
+		\subsection{整除分块}
+		基本形式$\sum\limits_{i=1}^{n} \lfloor \frac{n}{i} \rfloor$.假设n的因数从小到大保存在d[1..k]中。
+		\begin{equation}
+			\mathbf{d} = 
+			\left(
+				\begin{array}{ccc}
+					d_1, d_2,  d_3,  \ldots,  d_k
+				\end{array}	
+			\right)
+		\end{equation}
+		显然$i \in (d_j,d_{j+1}]$时$\lfloor \frac{n}{i} \rfloor$结果相同,假设结果为$k$, 则$d_{j+1}=\lfloor \frac{n}{k} \rfloor$。
+		因此可以一段一段区间的跳跃求和，将复杂度降到$\sqrt{n}$.
+		\par 大多数时候不是基本形式，而是基本形式乘以一个函数求和。这个时候，可以对这个函数求前缀和，然后用整除分块的代码做一下变通即可。
+		
+		%code block
+		\begin{lstlisting}[language={c++}]
+for(int l=1,r;l<=n;l=r+1) {
+  r=n/(n/l);
+  ans+=(r-l+1)*(n/l)*(sum[r]-sum[l-1]); // sum是乘以函数的前缀和 
+}
+		\end{lstlisting}
+
+		\subsection{莫比乌斯反演定理}
+			\subsubsection{因数形式}
+			\par d取遍n的所有因数。$F(n)=\sum\limits_{d \mid n}f(d)$,反演求出未知的$f$的表达式为$f(n)=\sum\limits_{d \mid n}\mu(d)F(\frac{n}{d})=\sum\limits_{d \mid n}F(d)\mu(\frac{n}{d})$
+			\subsubsection{倍数形式}
+			\par d取遍n的所有倍数。$F(n)=\sum\limits_{n \mid d}{f(d)}$,反演求出未知的$f$的表达式为$f(n)=\sum\limits_{n \mid d}{\mu(\frac{d}{n})F(d)}$.
+		\subsection{做题思路或者技巧}
+			\begin{enumerate}
+				\item 构造能够直接写出表达式的已知函数F，然后尝试因数或者倍数形式的小f.
+				\item 利用反演定理求出f的表达式。
+				\item 将ans用小f的形式表达出来。可能还是一个关于f的$\Sigma$求和式。
+				\item 代入f的反演结果，根据数学尝试变换枚举变量的顺序。
+				\item 与gcd有关的莫比乌斯反演。一般我们都是套路的去设$f(d)$\mbox{为}$gcd(i,j)=d$\mbox{的个数}，$F(n)$\mbox{为}$gcd(i,j)=d\mbox{的倍数}$的个数。
+				\item 注意最后的式子是不是包含一个整除分块的部分。
+			\end{enumerate}
+
+			%code block
+			\begin{lstlisting}[language={c++}]
+			\end{lstlisting}

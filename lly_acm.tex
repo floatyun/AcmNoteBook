@@ -1,0 +1,61 @@
+%!TEX program = xelatex
+\documentclass{article}
+\usepackage[UTF8]{ctex}
+\usepackage{fontspec}
+\usepackage{listings}
+\usepackage{xeCJK}
+
+\usepackage{xparse, mathtools}
+\usepackage{amsmath}
+\usepackage{geometry}%页边距
+
+%设置也的上下左右边距
+\geometry{left=3.17cm,right=3.17cm,top=2.54cm,bottom=2.54cm}
+
+\usepackage{xcolor} % 定制颜色
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+
+\lstset{ %
+	backgroundcolor=\color{white},      % choose the background color
+	basicstyle=\footnotesize\ttfamily,  % size of fonts used for the code
+	columns=fullflexible,
+	tabsize=4,
+	breaklines=true,               % automatic line breaking only at whitespace
+	captionpos=b,                  % sets the caption-position to bottom
+	commentstyle=\color{mygreen},  % comment style
+	escapeinside={\%*}{*)},        % if you want to add LaTeX within your code
+	keywordstyle=\color{blue},     % keyword style
+	stringstyle=\color{mymauve}\ttfamily,  % string literal style
+	frame=single,
+	rulesepcolor=\color{red!20!green!20!blue!20},
+	% identifierstyle=\color{red},
+	language=c++,
+}
+
+
+%行向量
+\NewDocumentCommand{\Rowvec}{ O{,} m }
+{
+	\vector_main:nnnn { p } { & } { #1 } { #2 }
+}
+\NewDocumentCommand{\Colvec}{ O{,} m }
+{
+	\vector_main:nnnn { p } { \\ } { #1 } { #2 }
+}
+
+\setmainfont{Consolas}
+\setCJKmainfont{STKaiti}%正文字体
+\newcommand{\shusong}{\CJKfontspec{FZShuSong-Z01S}}%方正书宋
+\newcommand{\xingkai}{\CJKfontspec{STXingkai}}%华文行楷
+\usepackage{indentfirst}%设置缩进
+\setlength{\parindent}{2em} %也可在正文中非全局设置
+\begin{document}
+	% 目录区
+	\tableofcontents
+	% 目录区
+	
+	\include{dp}
+	\include{Math_and_Arithmetical}
+\end{document}

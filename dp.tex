@@ -1,0 +1,9 @@
+\section{动态规划}
+		\subsection{背包问题}
+			\subsubsection{0-1背包}
+				\par n个物体，每个物体的费用为$cost_i$,价值为$val_i$.最大允许费用为$max\_cost$,问能挑选出来的最大价值是什么。
+				\begin{lstlisting}[language={c++}]
+for (int i = 1; i <= max_cost; i++)
+	for (int l = max_cost - i; l >= 0; l--)
+		f[l + i] = max(f[l] + cost[i], f[l + i]);		
+				\end{lstlisting}
