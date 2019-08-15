@@ -1,0 +1,49 @@
+\section{欧拉函数}
+	\par $\phi(n)$表示1到n中与n互素的个数.
+	\par 公式 $\phi(n)=n\prod\limits_{p \mid n \& p \in P } 1-\frac{1}{p}$
+	\par $\phi(1..n)$总体求解可用线性筛$O(n)$求出.
+	\par 单个$\phi(n)$可用分解质因数法直接用公式$O(\sqrt{n}$求出。
+	
+	%code block
+\begin{lstlisting}[language={c++}]
+// 时间复杂度sqrt(n)求phi(n) n最大1e12-1e14的级别
+// more beautiful version, but slower (just a little bit)
+ll phi(ll n) {
+	ll a = n;
+	for (ll p = 2; p * p <= n; ++p)
+		if (!(n % p)) {
+			do
+				n /= p;
+			while (!(n % p));
+			a = a / p * (p - 1);
+		}
+	if (n > 1) a = a / n * (n - 1);  // the rest n is a prime
+	return a;
+}
+
+// 计算1--n的所有phi(i) 线性时空复杂度，n应该最大是1e7级别的
+void get_all_phi(int n, vector<int>& phi) {
+	phi.resize(n + 1);
+	vector<bool> is_prime(n + 1, true);
+	vector<int> prime;
+	is_prime[1] = is_prime[0] = false;
+	phi[1] = 1;
+	for (int i = 2; i <= n; ++i) {
+		if (is_prime[i]) {
+			prime.push_back(i);
+			phi[i] = i - 1;
+		}
+		for (auto p : prime) {
+			if (i * p > n) break;
+			is_prime[i * p] = false;
+			if (i % p) {
+				// i不具有素因子p，i*p对于素因子p来讲次数=1。贡献是(p-1)
+				phi[i * p] = phi[i] * (p - 1);
+			} else {
+				phi[i * p] = phi[i] * p;  // i具有素因子p,则i*p对于欧拉函数值来讲乘以p
+				break;  // 保证每个数只被最小素因子访问到。
+			}
+		}
+	}
+}
+\end{lstlisting}
