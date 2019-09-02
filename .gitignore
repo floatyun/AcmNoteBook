@@ -1,5 +1,8 @@
 # ignore temporary
 *.*
+*
+*.html
+Makefile
 !*.tex
 !.gitignore
 src/*
