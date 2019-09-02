@@ -1,0 +1,16 @@
+\section{拓展欧几里得算法}
+	\par 欧几里得算法直接使用g++中的<algorithm>库中\_\_gcd()函数即可。
+	\par $(a,b)=(b,a \bmod b)$.
+	\par 拓展欧几里得算法用于求出不定方程$ax+by=(a,b)$的一个特解$x_0,y_0$, 顺带求出$(a,b)$,{\bfseries 通解$x=x_0+\frac{b}{(a,b)}t,\,y=y_0-\frac{a}{(a,b)}t \; (t \in Z)$}.
+	\subsection{解不定方程}
+		\par 不定方程$ax+by=c$有解等价于$(a,b) \mid c$.据此判断是否有解，若有解，则原不定方程的解是（且只能是）欧几里得算法所解不定方程解的$\frac{c}{(a,b)}$倍。
+	\subsection{求解模线性方程（线性同余方程）}
+		$ax \equiv c\pmod{m} \Longleftrightarrow ax+my=c$.
+	\subsection{求乘法逆元}
+		\par $ab \equiv 1 \pmod{m}$, 则a关于模m的乘法逆元是b，b关于模m的乘法逆元是a。或者说$Z_m$群中a和b互为乘法逆元。
+		\par 用乘法逆元有$\frac{A}{b} \equiv A \times b^{-1} \pmod{c}$.当左边的式子A是很大的数，而b是小规模数，且除出来的数一定是整数的时候，可以用右式边算边模。
+		\par \textbf{求解} $ax \equiv 1 \pmod{m} \Longleftrightarrow ax+my= 1$.解出的x即为解，只是注意需要用通解公式将$x$调整到$Z_m$范围内。
+	\subsection{Code}
+	\begin{lstlisting}[language={c++}]
+
+	\end{lstlisting}
