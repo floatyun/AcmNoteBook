@@ -10,7 +10,164 @@
 		\par $ab \equiv 1 \pmod{m}$, 则a关于模m的乘法逆元是b，b关于模m的乘法逆元是a。或者说$Z_m$群中a和b互为乘法逆元。
 		\par 用乘法逆元有$\frac{A}{b} \equiv A \times b^{-1} \pmod{c}$.当左边的式子A是很大的数，而b是小规模数，且除出来的数一定是整数的时候，可以用右式边算边模。
 		\par \textbf{求解} $ax \equiv 1 \pmod{m} \Longleftrightarrow ax+my= 1$.解出的x即为解，只是注意需要用通解公式将$x$调整到$Z_m$范围内。
-	\subsection{Code}
-	\begin{lstlisting}[language={c++}]
+	\subsection{线性同余方程组}
+		\par 方程组$a_ix \equiv c_i \pmod{m_i} \quad (i=1, 2, 3, \ldots, n)$
+		\par 对每一个现行同余方程，若无解，则方程组无解；否则，可以解得$x=k_it_i+x_i, \; t_i \in Z$.而$x_i \in \left[0,k_i\right), k_i = \frac{m_i}{(a_i,m_i)} \leq m_i$.不妨增加$x_0=0,k_0=1$,即增加式子$x=t_0+0$.
+		\par 现在考虑同时满足$x=k_1t_1+x_1$与$x=k_2t_2+x_2$两个约束的x能否合并成一个依旧如此形式的一个表达式，即$x=k_0t+x_0$.
+		\par 联立两个方程，易得$k_1t_1-k_2t_2=x_2-x_1$,将其视作关于$t_1,t_2$的不定方程。若这个方程无解，说明同时满足两个条件的x不存在；否则，每确定一个$t_1$可以代入$x=k_1t_1+x_1$确定一个$x$. 如果我们只是解出$t_1$的话，不妨换成$k_1t_1+k_2t_2=x_2-x_1$，$t_1$的每一个解是不变的。
+		\par 假设$k_1t_1+k_2t_2=x_2-x_1$有解，并且解为$t_1=t_{1_0}+\frac{k_2}{(k_1,k_2)}t \quad t_{1_0} \in \left[ 0,\frac{k_2}{(k_1,k_2)} \right), \; t \in Z$.
+		\par 代入$x=k_1t_1+x_1$得$x=k_1(t_{1_0}+\frac{k_2}{(k_1,k_2)}t)+x_1=\frac{k_1k_2}{(k_1,k_2)}t+(k_1t_{1_0}+x_1)$.而$k_1t_{1_0}+x_1 < \frac{k_1k_2}{(k_1,k_2)} \Longleftrightarrow t_{1_0}+\frac{x_1}{k_1} < \frac{k_2}{(k_1,k_2)}$.而$t_{1_0} < \frac{k_2}{(k_1,k_2)}$.注意到$t_{1_0},\frac{k_2}{(k_1,k_2)}$是整数，故$t_{1_0} \leq \frac{k_2}{(k_1,k_2)}-1$.又$\frac{x_1}{k_1}\, <\, 1$.这两个不等式相加即可得到$$t_{1_0}+\frac{x_1}{k_1} < \frac{k_2}{(k_1,k_2)}$$。即符合前面定义的形式：$$(k_1t_{1_0}+x_1) \in \left[0, \frac{k_1k_2}{(k_1,k_2)}\right)$$.
+		\par 合并为$x=kt+x_0.$的形式有：\begin{align*}
+			k &=\frac{k_1,k_2}{(k_1,k_2)}=[k_1,k_2] \\
+			x_0 &=k_1t_{1_0}+x_1
+		\end{align*}
+		\par 对于写程序，由于我们引入了$x=x_0=0,k=k_0=1$.可以每次$x_0,k_0$与$x_i,k_i$合并成$x_0,k_0$.故程序迭代是$x+=kt,k=[k,k_i]$,其中$t_0$是$k_0t_0+k_it_i=x_i-x_0$的不定方程的最小非负整数解。
+		\subsubsection{程序设计方面爆long long的问题及应对策略}
+		\par {\bfseries 由于k的迭代是不断求最小公倍数，而特解x始终是小于k的，因此k和x可能会增长的很快导致爆long long.尤其是k很容易爆掉。}
+		\par 如何解决爆炸的问题？或许可以用{\textbf \_\_int128}。如果k和x还是都爆掉了，那么没法子，只能设法自己实现k和x的存储，注意到解不定方程需要求$(k_0,k_i)$与$\frac{k_i}{(k_0,k_i)}$,所以要大数加减，大数乘除模普通数的实现。估计够呛。
+		\begin{lstlisting}[language={c++}]
+// poj 2891 然而poj不支持__int128和C++11
+#include <bits/stdc++.h>
+typedef __int128 ll;
 
-	\end{lstlisting}
+// 求解不定方程ax+by=(a,b)的一组特解并返回a,b最大公约数
+// x,y存储返回的一组特解。易懂version
+ll ex_gcd1(ll a, ll b, ll &x, ll &y) {
+	if (b) {
+		auto d = ex_gcd1(b, a%b, x,  y);
+		auto x_bac = x;
+		x = y; // x设为后
+		y = x_bac - a/b * y; // y设为前-a/b*后
+		return d;
+	} else {
+		x = 1; y = 0;
+		return a;
+	}
+}
+
+// 求解不定方程ax+by=(a,b)的一组特解并返回a,b最大公约数
+// x,y存储返回的一组特解。
+ll ex_gcd(ll a, ll b, ll &x, ll &y) {
+	if (b) {
+		auto d = ex_gcd(b, a%b, y, x); // 注意x和y位置互换了。
+		// x是后，无需赋值，y是 前-a/b*后 即 y -= a/b*x
+		y -= a/b*x;
+		return d;
+	} else {
+		x = 1; y = 0;
+		return a;
+	}
+}
+
+// 求解不定方程ax+by=c.
+// 返回值表示是否有解
+// d存储是(a,b)
+// 当有解的情况下
+// x,y存储一组特解,并且确保x是最小的非负整数。
+// 通解是X=x+(b/d)*t,Y=y-(a/d)*t t是整数。
+bool binary_linear_indefinite_equation(ll a, ll b, ll c, ll &x, ll &y, ll &d) {
+	d = ex_gcd(a, b, x, y); // solve: ax+by=(a,b)
+	if (c%d) return false;
+	x *= c/d;
+	y *= c/d;
+	auto k = b/d;
+	x = (x%k+k)%k; // 调为最小非负整数
+	y = (d-a*x)/b;
+	return true;
+}
+
+// 线性同余方程 Linear congruence equation
+// ax = c (mod m) <===> ax+my=c
+// x存储最小非负解，通解X=x+kt t为整数
+// 有解的情况下，最小非负解x肯定在[0,m)范围内
+bool linear_congruence_equation(ll a, ll c, ll m, ll &x, ll &k) {
+	ll y, d;
+	auto ans = binary_linear_indefinite_equation(a, m, c, x, y, d);
+	k = m/d;
+	return ans;
+}
+
+// 求a在Zm<+,*>中的乘法逆元x
+// 返回逆元是否存在,x存储逆元
+// ax = 1 (mod m)
+bool multiplicative_inverse(ll a, ll m, ll &x) {
+	ll k;
+	return linear_congruence_equation(a, 1, m, x, k);
+	// assert(k == m);
+}
+
+// 线性同余方程组 Linear congruence equations
+// a_ix = c_i (mod m_i) 共n个
+// 可能存在的问题，由于迭代过程中k一直在求最小公倍数，所以可能会爆long long，这个，最佳的方法是直接暴力把ll的定义改为__int128
+// 但是要注意__int128的输入输出
+// 如果还是爆，我没法子了
+bool linear_congruence_equations(int n, ll a[], ll c[], ll m[], ll &x, ll &k) {
+	ll x_i, k_i, t, t_i, d;
+	x = 0; k = 1;
+	for (int i = 0; i < n; ++i) {
+		if (!linear_congruence_equation(a[i], c[i], m[i], x_i, k_i))
+			return false; 
+		// kt+x
+		// k_it_i+x_i
+		if (!binary_linear_indefinite_equation(
+			k, k_i, x_i-x, t, t_i, d))
+			return false;
+		x += k*t;
+		k *= k_i/d;
+	}
+	return true;
+}
+
+inline ll read()
+{
+	ll x = 0;
+	bool f = 0;
+	char ch = getchar();
+	while (ch < '0' || '9' < ch)
+		f |= ch == '-', ch = getchar();
+	while ('0' <= ch && ch <= '9')
+		x = x * 10 + ch - '0', ch = getchar();
+	return f ? -x : x;
+}
+
+void write(ll a)
+{
+	if (a < 0)
+	{
+		putchar('-');
+		a = -a;
+	}
+	if (a >= 10)
+	{
+		write(a / 10);
+	}
+	putchar(a % 10 + '0');
+}
+
+const int kMaxN = 10000;
+ll a[kMaxN]; // ax=c (mod c)
+ll m[kMaxN];
+ll c[kMaxN]; 
+void solve(int n) {
+	for (int i = 0; i < n; ++i) {
+		a[i] = 1;
+		m[i] = read();
+		c[i] = read();
+	}
+	ll x,k;
+	auto ans = linear_congruence_equations(n,a,c,m,x,k);
+	if (ans) {
+		write(x);
+		putchar('\n');
+	} else
+		puts("-1");
+}
+
+int main()
+{
+	int n;
+	while (scanf("%d",&n) != EOF) {
+		solve(n);
+	}
+}
+		\end{lstlisting}
