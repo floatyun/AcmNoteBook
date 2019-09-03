@@ -1,5 +1,6 @@
+// poj 2891 然而poj不支持__int128和C++11
 #include <bits/stdc++.h>
-typedef long long ll;
+typedef __int128 ll;
 
 // 求解不定方程ax+by=(a,b)的一组特解并返回a,b最大公约数
 // x,y存储返回的一组特解。易懂version
@@ -58,6 +59,86 @@ bool linear_congruence_equation(ll a, ll c, ll m, ll &x, ll &k) {
 	return ans;
 }
 
+// 求a在Zm<+,*>中的乘法逆元x
+// 返回逆元是否存在,x存储逆元
+// ax = 1 (mod m)
+bool multiplicative_inverse(ll a, ll m, ll &x) {
+	ll k;
+	return linear_congruence_equation(a, 1, m, x, k);
+	// assert(k == m);
+}
+
+// 线性同余方程组 Linear congruence equations
+// a_ix = c_i (mod m_i) 共n个
+// 可能存在的问题，由于迭代过程中k一直在求最小公倍数，所以可能会爆long long，这个，最佳的方法是直接暴力把ll的定义改为__int128
+// 但是要注意__int128的输入输出
+// 如果还是爆，我没法子了
+bool linear_congruence_equations(int n, ll a[], ll c[], ll m[], ll &x, ll &k) {
+	ll x_i, k_i, t, t_i, d;
+	x = 0; k = 1;
+	for (int i = 0; i < n; ++i) {
+		if (!linear_congruence_equation(a[i], c[i], m[i], x_i, k_i))
+			return false; 
+		// kt+x
+		// k_it_i+x_i
+		if (!binary_linear_indefinite_equation(
+			k, k_i, x_i-x, t, t_i, d))
+			return false;
+		x += k*t;
+		k *= k_i/d;
+	}
+	return true;
+}
+
+inline ll read()
+{
+	ll x = 0;
+	bool f = 0;
+	char ch = getchar();
+	while (ch < '0' || '9' < ch)
+		f |= ch == '-', ch = getchar();
+	while ('0' <= ch && ch <= '9')
+		x = x * 10 + ch - '0', ch = getchar();
+	return f ? -x : x;
+}
+
+void write(ll a)
+{
+	if (a < 0)
+	{
+		putchar('-');
+		a = -a;
+	}
+	if (a >= 10)
+	{
+		write(a / 10);
+	}
+	putchar(a % 10 + '0');
+}
+
+const int kMaxN = 10000;
+ll a[kMaxN]; // ax=c (mod c)
+ll m[kMaxN];
+ll c[kMaxN]; 
+void solve(int n) {
+	for (int i = 0; i < n; ++i) {
+		a[i] = 1;
+		m[i] = read();
+		c[i] = read();
+	}
+	ll x,k;
+	auto ans = linear_congruence_equations(n,a,c,m,x,k);
+	if (ans) {
+		write(x);
+		putchar('\n');
+	} else
+		puts("-1");
+}
+
 int main()
 {
+	int n;
+	while (scanf("%d",&n) != EOF) {
+		solve(n);
+	}
 }
