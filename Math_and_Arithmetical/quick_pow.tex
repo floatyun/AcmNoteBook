@@ -1,0 +1,62 @@
+\section{快速乘幂及矩阵快速幂}
+    \subsection{快速模模乘幂}
+        \par 时间复杂度: 快速乘、普通快速幂$O(\log_2{n})$，使用快速乘的快速幂$O(\log_2{n} \times \log_2{max_val})=O(\log_2{n} \times \log_2{mod})$
+        \begin{lstlisting}[language={c++}]
+struct mod_sys{
+    typedef long long ll;
+    ll mod;
+    // mod_sys类初始化设置模数
+    inline void set_mod(ll mod0) {mod = mod0;}
+    // 返回a在[0,mod)内标准等价的数，即数学意义上的a%mod
+    inline ll to_std(ll a) {return (a%mod+mod)%mod;}
+    // 计算数学意义上的a*n%mod
+    ll mlt(ll a, ll n) {
+        a = to_std(a); n = to_std(n);
+        if (0 == a || 0 == n) return 0;
+        // 始终维持要求的数可以表示为n(a)+t
+        ll t = 0;
+        while (n > 1) {
+            if (n&1) t = (t+a)%mod;
+            n >>= 1; a = (a<<1)%mod;
+        }
+        return (a+t)%mod; // now n = 1
+    }
+    // 计算数学意义上的a^n%mod 输入应当a,n>=0
+    ll pow(ll a, ll n)
+    {   
+        if (n == 0) return 1%mod;
+        a = to_std(a);
+        // 始终维持要求的数可以表示为(a)^n*t
+        ll t = 1;
+        while (n > 1)
+        {
+            if (n&1) t = t*a%mod;
+            n >>= 1; a = a*a%mod;
+        }
+        return a*t%mod; // now n = 1
+    }
+    // 计算数学意义上的a^n%mod 输入应当a,n>=0
+    // 此版本使用quick_mlt防止相乘爆ll
+    ll pow_v2(ll a, ll n)
+    {   
+        if (n == 0) return 1%mod;
+        a = to_std(a);
+        // 始终维持要求的数可以表示为(a)^n*t
+        ll t = 1;
+        while (n > 1)
+        {
+            if (n&1) t = mlt(t,a);
+            n >>= 1; a = mlt(a,a);
+        }
+        return mlt(t,a); // now n = 1
+    }
+};
+        \end{lstlisting}
+    \subsection{矩阵乘法}
+        时间复杂度:$n \times m$与$m \times r$的矩阵相乘，复杂度$O(nmr)$。
+        \begin{lstlisting}[language={c++}]
+        \end{lstlisting}
+    \subsection{矩阵快速幂}
+        计算$A^n$.矩阵乘法的次数$O(\log_2{n})$,总复杂度$|A|^3\log_2{n}$.
+        \begin{lstlisting}[language={c++}]
+        \end{lstlisting}
