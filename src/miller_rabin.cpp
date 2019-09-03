@@ -1,9 +1,7 @@
-\section{快速乘幂及矩阵快速幂}
-    \subsection{快速模乘与快速模幂}
-        \par 时间复杂度: 快速乘、普通快速幂$O(\log_2{n})$，使用快速乘的快速幂$O(\log_2{n} \times \log_2{max\_val})=O(\log_2{n} \times \log_2{mod})$
-        \begin{lstlisting}[language={c++}]
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
 struct mod_sys{
-    typedef long long ll;
     ll mod;
     // mod_sys类初始化设置模数
     inline void set_mod(ll mod0) {mod = mod0;}
@@ -51,12 +49,52 @@ struct mod_sys{
         return mlt(t,a); // now n = 1
     }
 };
-        \end{lstlisting}
-    \subsection{矩阵乘法}
-        时间复杂度:$n \times m$与$m \times r$的矩阵相乘，复杂度$O(nmr)$。
-        \begin{lstlisting}[language={c++}]
-        \end{lstlisting}
-    \subsection{矩阵快速幂}
-        计算$A^n$.矩阵乘法的次数$O(\log_2{n})$,总复杂度$|A|^3\log_2{n}$.
-        \begin{lstlisting}[language={c++}]
-        \end{lstlisting}
+
+// 如果只是int范围内，可以将pow_v2改为pow，mlt改为普通乘法
+bool miller_rabin(ll a, ll n, ll q, ll m, mod_sys& mod) {
+    a = mod.pow_v2(a, m);
+    bool is_ordinary = true;
+    for (int i = 0; i < q; ++i) {
+        if (a == 1) {
+            return is_ordinary;
+        } else {
+            is_ordinary = (a == n-1);
+            a = mod.mlt(a,a);
+        }
+    }
+    return (a==1)&&(is_ordinary); // 最后一项
+}
+
+// 使用miller_rabin检测是否是素数
+const int kCheckCnt = 8;
+// 为了随机数
+random_device rd;
+mt19937_64 gen(rd());
+bool miller_rabin(ll n) {
+    if (n == 2) return true;
+    if ((n <= 2) || (n&1^1)) return false;
+    // 2^q×m表示原本输入的n-1
+    ll m = n, q = 0;
+    do { m >>= 1; ++q; } while(m&1^1);
+    // 随机数生成，[1,n-1] 均匀分布
+    uniform_int_distribution<> dis(1, n-1);
+    mod_sys mod;
+    mod.set_mod(n);
+    for (int i = 0; i < kCheckCnt; ++i)
+        if (!miller_rabin(dis(gen), n, q, m, mod))
+            return false;
+    return true;
+}
+
+int main() {
+    int n;
+    while (scanf("%d",&n)!= EOF) {
+        int cnt = 0;
+        ll a;
+        while (n--) {
+            scanf("%lld",&a);
+            cnt += miller_rabin(a);
+        }
+        printf("%d\n",cnt);
+    }
+}

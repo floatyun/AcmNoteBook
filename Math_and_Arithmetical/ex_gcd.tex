@@ -3,7 +3,7 @@
 	\par $(a,b)=(b,a \bmod b)$.
 	\par 拓展欧几里得算法用于求出不定方程$ax+by=(a,b)$的一个特解$x_0,y_0$, 顺带求出$(a,b)$,{\bfseries 通解$x=x_0+\frac{b}{(a,b)}t,\,y=y_0-\frac{a}{(a,b)}t \; (t \in Z)$}.
 	\subsection{解不定方程}
-		\par 不定方程$ax+by=c$有解等价于$(a,b) \mid c$.据此判断是否有解，若有解，则原不定方程的解是（且只能是）欧几里得算法所解不定方程解的$\frac{c}{(a,b)}$倍。
+		\par 不定方程$ax+by=c$有解等价于$(a,b) \mid c$.据此判断是否有解，若有解，假设有一组特解$x_0^{'},y_0^{'}$,则它们的$\frac{c}{(a,b)}$倍显然是原不定方程的一组特解。$x_0=\frac{c}{(a,b)}x_0^{'},y_0=\frac{c}{(a,b)}y_0^{'}$,而通解依旧是$x=x_0+\frac{b}{(a,b)}t,\,y=y_0-\frac{a}{(a,b)}t \; (t \in Z)$.
 	\subsection{求解模线性方程（线性同余方程）}
 		$ax \equiv c\pmod{m} \Longleftrightarrow ax+my=c$.
 	\subsection{求乘法逆元}
@@ -22,9 +22,11 @@
 			x_0 &=k_1t_{1_0}+x_1
 		\end{align*}
 		\par 对于写程序，由于我们引入了$x=x_0=0,k=k_0=1$.可以每次$x_0,k_0$与$x_i,k_i$合并成$x_0,k_0$.故程序迭代是$x+=kt,k=[k,k_i]$,其中$t_0$是$k_0t_0+k_it_i=x_i-x_0$的不定方程的最小非负整数解。
-		\subsubsection{程序设计方面爆long long的问题及应对策略}
+		\par {\bfseries 程序设计方面爆long long的问题及应对策略}
 		\par {\bfseries 由于k的迭代是不断求最小公倍数，而特解x始终是小于k的，因此k和x可能会增长的很快导致爆long long.尤其是k很容易爆掉。}
 		\par 如何解决爆炸的问题？或许可以用{\textbf \_\_int128}。如果k和x还是都爆掉了，那么没法子，只能设法自己实现k和x的存储，注意到解不定方程需要求$(k_0,k_i)$与$\frac{k_i}{(k_0,k_i)}$,所以要大数加减，大数乘除模普通数的实现。估计够呛。
+	\subsection{code}
+		\par 复杂度，拓展欧几里得算法复杂度$\ln{val}$,不定方程、线性同余方程、逆元都是一次拓欧，其余部分是$O(1)$.线性同余方程组每一个方程需要解2个不定方程，其余操作单个都是$O(1)$,复杂度$O(n\ln{val})$.
 		\begin{lstlisting}[language={c++}]
 // poj 2891 然而poj不支持__int128和C++11
 #include <bits/stdc++.h>

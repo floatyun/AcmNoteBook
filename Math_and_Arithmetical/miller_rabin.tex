@@ -1,0 +1,55 @@
+\subsection{Miller-Rabin素数检测算法}
+其基于以下两个定理。
+\begin{enumerate}
+    \item Fermat小定理 若n是素数，则$\forall a(a \not\equiv 0 \pmod{n})$,有$a^{n-1} \equiv 1 \pmod{n}$.
+    \item 二次探测定理 若n是素数，则$x^2 \equiv 1 \pmod{n}$只有平凡根$x=\pm1$,即$x=1,x=n-1$.
+\end{enumerate}
+\subsubsection{具体算法}
+假设$n$是奇数，令$n=m \times 2^q (q \geq 1)$,其中$m$是奇数.
+对于序列$a^m \bmod n, a^{2m} \bmod n, a^{4m} \bmod n,\ldots,a^{2^q \times m} \bmod n$.
+最后一项就是费马小定理中的$a^{n-1}$, 并且每一项都是前一项的平方。
+我们一项一项往后计算。
+\begin{itemize}
+    \item 若当前项为1，后面每一项显然都是1。而根据二次探测定理，n是素数必须前面一项是1或n-1.如果不符合，断言不是素数；符合，断言是素数。
+    \item 若当前项不是1,暂时不断言，接着往后算。除非当前是最后一项了，那么断言不是素数。
+\end{itemize}
+\textbf{当然，如果第一项是1，由于不存在二次探测的方程，所以不检验前面一项（或者认为前面一项符合条件）。}
+\subsubsection{Code}
+使用了快速幂模和快速幂加模板mod\_sys。下面代码只是miller-rabin核心代码。
+\begin{lstlisting}[language={c++}]
+// 如果只是int范围内，可以将pow_v2改为pow，mlt改为普通乘法
+bool miller_rabin(ll a, ll n, ll q, ll m, mod_sys& mod) {
+    a = mod.pow_v2(a, m);
+    bool is_ordinary = true;
+    for (int i = 0; i < q; ++i) {
+        if (a == 1) {
+            return is_ordinary;
+        } else {
+            is_ordinary = (a == n-1);
+            a = mod.mlt(a,a);
+        }
+    }
+    return (a==1)&&(is_ordinary); // 最后一项
+}
+
+// 使用miller_rabin检测是否是素数
+const int kCheckCnt = 8;
+// 为了随机数
+random_device rd;
+mt19937_64 gen(rd());
+bool miller_rabin(ll n) {
+    if (n == 2) return true;
+    if ((n <= 2) || (n&1^1)) return false;
+    // 2^q×m表示原本输入的n-1
+    ll m = n, q = 0;
+    do { m >>= 1; ++q; } while(m&1^1);
+    // 随机数生成，[1,n-1] 均匀分布
+    uniform_int_distribution<> dis(1, n-1);
+    mod_sys mod;
+    mod.set_mod(n);
+    for (int i = 0; i < kCheckCnt; ++i)
+        if (!miller_rabin(dis(gen), n, q, m, mod))
+            return false;
+    return true;
+}
+\end{lstlisting}
