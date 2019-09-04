@@ -1,10 +1,10 @@
-\subsection{Miller-Rabin素数检测算法}
+\section{Miller-Rabin素数检测算法}
 其基于以下两个定理。
 \begin{enumerate}
     \item Fermat小定理 若n是素数，则$\forall a(a \not\equiv 0 \pmod{n})$,有$a^{n-1} \equiv 1 \pmod{n}$.
     \item 二次探测定理 若n是素数，则$x^2 \equiv 1 \pmod{n}$只有平凡根$x=\pm1$,即$x=1,x=n-1$.
 \end{enumerate}
-\subsubsection{具体算法}
+\subsection{具体算法}
 假设$n$是奇数，令$n=m \times 2^q (q \geq 1)$,其中$m$是奇数.
 对于序列$a^m \bmod n, a^{2m} \bmod n, a^{4m} \bmod n,\ldots,a^{2^q \times m} \bmod n$.
 最后一项就是费马小定理中的$a^{n-1}$, 并且每一项都是前一项的平方。
@@ -14,7 +14,7 @@
     \item 若当前项不是1,暂时不断言，接着往后算。除非当前是最后一项了，那么断言不是素数。
 \end{itemize}
 \textbf{当然，如果第一项是1，由于不存在二次探测的方程，所以不检验前面一项（或者认为前面一项符合条件）。}
-\subsubsection{Code}
+\subsection{Code}
 使用了快速幂模和快速幂加模板mod\_sys。下面代码只是miller-rabin核心代码。
 \begin{lstlisting}[language={c++}]
 // 如果只是int范围内，可以将pow_v2改为pow，mlt改为普通乘法

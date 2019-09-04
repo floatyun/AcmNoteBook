@@ -72,10 +72,12 @@ struct mtr{
         for (auto &row : data)
             row.resize(c_sz, item_val);
     }
+
     inline bool is_square() { return r_sz == c_sz; }
+
     // inline row_type& operator()(int r) { return data[r]; }
     // inline item_type& operator()(int r,int c) { return data[r][c];}
-    
+
     // 会自动调用set_size,调用之前请勿调用set_size
     // 设置成n阶单位矩阵
     void set_identity(int n) {
@@ -105,12 +107,33 @@ struct mtr{
                 ans.data[i][j] = data[i][j] + obj.data[i][j];
         return ans;
     }
-    mtr operator-(const mtr& obj) const {/*只要把加法改成减法即可*/}
+    mtr operator-(const mtr& obj) const {
+        mtr ans;
+        ans.set_size(r_sz, c_sz);
+        for (int i = 0; i < r_sz; ++i)
+            for (int j = 0; j < c_sz; ++j)
+                ans.data[i][j] = data[i][j] - obj.data[i][j];
+        return ans;
+    }
     // 矩阵数乘 数在右边
     // 数乘 数在左边必须在类外边用函数实现，模板不提供，容易改出来
-    mtr operator*(item_type obj) const {/*只要把加法改成*obj即可*/}
+    mtr operator*(item_type obj) const {
+        mtr ans;
+        ans.set_size(r_sz, c_sz);
+        for (int i = 0; i < r_sz; ++i)
+            for (int j = 0; j < c_sz; ++j)
+                ans.data[i][j] = data[i][j] * obj;
+        return ans;
+    }
     // 所有元素对mod取模(数学意义)
-    void get_mod(ll mod) {/*只要把加法改成(data[i][j]%mod+mod)%mod再%mod即可*/}
+    void get_mod(ll mod) {
+        for (int i = 0; i < r_sz; ++i)
+            for (int j = 0; j < c_sz; ++j) {
+                data[i][j] %= mod;
+                if (data[i][j] < 0)
+                    data[i][j] += mod;
+            }
+    }
     // 矩阵乘法 不用运算符乘号进行重载，便于增加mod参数修改成取模版
     // 默认元素乘法不爆long long，否则需要引入mod_sys模板
     // 默认待两个输入矩阵已经get_mod规约过了。
