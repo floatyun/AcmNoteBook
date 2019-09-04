@@ -1,0 +1,34 @@
+\section{lucas定理}
+    \par $$\tbinom{n}{m} \bmod p = \tbinom{\lfloor \frac{n}{p} \rfloor}{\lfloor \frac{m}{p} \rfloor} \tbinom{n \bmod p}{m \bmod p} \bmod p=\tbinom{n/p}{m/p}\tbinom{n\%p}{m\%p} \bmod p$$  
+    \par 先预先求出$i! \;(i \in \left[0,p\right))$. 并利用费马小定理和快速幂乘求出每一个$i!$的逆元$(i!)^{-1}$。求$\tbinom{n}{m} \bmod p$，当$m=0$直接就是$1$.若$n,m$都在$p$范围内，则直接转化为$n! \times (m!)^{-1} \times [(n-m)!]^{-1}$.否则就是\textit{lucas定理}缩小规模。
+    \par {\bfseries 对一个固定的p，预处理求阶乘及快速模幂求其逆元，时间复杂度$O(p\log_2{p})$。空间复杂度$O(p)$。预处理之后，单次求$\tbinom{n}{m} \bmod p$复杂度$O(\log_{p}{m})$} 
+    \begin{lstlisting}[language={c++}]
+void prepare(ll p, vector<ll>&fac, vector<ll>&inv_fac) {
+    fac.resize(p); inv_fac.resize(p);
+    mod_sys mod;
+    mod.set_mod(p);
+    fac[0] = 1;
+    inv_fac[0] = 1;
+    for (int i = 1; i < p; ++i) {
+        fac[i] = (fac[i-1]*i)%p;
+        inv_fac[i] = mod.pow(fac[i], p-2); // 既然能枚举一遍，p*p不应该爆ll
+    }
+}
+
+// 输入预设0=<n,m<p
+inline ll combination(ll n, ll m, ll p, vector<ll>&fac, vector<ll>&inv_fac) {
+    if (n < m) return 0;
+    return fac[n]*inv_fac[m]%p*inv_fac[n-m]%p;
+}
+
+ll lucas(ll n, ll m, ll p, vector<ll>&fac, vector<ll>&inv_fac) {
+    if (n < m) return 0;
+    ll ans = 1;
+    while(true) {
+        if (m == 0) return ans;
+        if (n < p && m < p) return ans*combination(n,m,p,fac,inv_fac)%p;
+        ans = ans * combination(n%p,m%p,p,fac,inv_fac)%p;
+        n/=p; m/=p;
+    }
+}
+    \end{lstlisting}
