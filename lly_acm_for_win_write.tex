@@ -1,0 +1,67 @@
+%!TEX program = xelatex
+\documentclass{article}
+%\documentclass[utf8]{ctexart}
+\usepackage[UTF8]{ctex}
+\usepackage{fontspec}
+\usepackage{listings}
+\usepackage{xeCJK}
+
+\usepackage{xparse, mathtools}
+\usepackage{amsmath}
+\usepackage{geometry}%页边距
+
+%设置也的上下左右边距
+\geometry{left=3.17cm,right=3.17cm,top=2.54cm,bottom=2.54cm}
+
+\usepackage[dvipsnames, svgnames, x11names]{xcolor} % 定制颜色
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+
+%行向量
+\NewDocumentCommand{\Rowvec}{ O{,} m }
+{
+	\vector_main:nnnn { p } { & } { #1 } { #2 }
+}
+\NewDocumentCommand{\Colvec}{ O{,} m }
+{
+	\vector_main:nnnn { p } { \\ } { #1 } { #2 }
+}
+
+\setmainfont{Candara}[BoldFont={Microsoft JhengHei}, ItalicFont={Corbel}]
+%\setCJKmainfont{STKaiti}[BoldFont={FandolHei-Bold}, ItalicFont={STXingkai}]
+\setCJKmainfont{FZYBKSJW.TTF}[BoldFont={FandolHei-Bold.otf}, ItalicFont={STXingkai.ttf}] %正文字体
+%[BoldFont={FandolHei-Bold}, ItalicFont={STXingkai}]1
+\setmonofont{Consolas} %inconsolata
+\newcommand{\shusong}{\CJKfontspec{FZShuSong-Z01S}} %方正书宋
+\newcommand{\xingkai}{\CJKfontspec{STXingkai}}%华文行楷
+\usepackage{indentfirst}%设置缩进
+\setlength{\parindent}{2em} %也可在正文中非全局设置
+
+
+
+\lstset{ %
+	backgroundcolor=\color{white},      % choose the background color
+	basicstyle=\small\ttfamily,  % size of fonts used for the code
+	numbers=none,                                        % 在左侧显示行号
+  numberstyle=\small\color{Dandelion},                       % 设定行号格式
+	columns=fixed,
+	tabsize=2,
+	breaklines=true,               % automatic line breaking only at whitespace
+	captionpos=b,                  % sets the caption-position to bottom
+	commentstyle=\color{mygreen},  % comment style
+	escapeinside={\%*}{*)},        % if you want to add LaTeX within your code
+	keywordstyle=\color{blue},     % keyword style
+	stringstyle=\color{mymauve}\ttfamily,  % string literal style
+	frame=double,
+	rulesepcolor=\color{red!20!green!20!blue!20},
+	identifierstyle=\color{VioletRed},
+	morekeywords={ll},
+	language=c++,
+}
+
+
+
+\begin{document}
+	\include{Math_and_Arithmetical/lucas_pdf}
+\end{document}

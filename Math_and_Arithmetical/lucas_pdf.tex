@@ -1,0 +1,156 @@
+\section{lucas及其拓展}
+\subsection{lucas定理}
+	\par $$\tbinom{n}{m} \bmod p = \tbinom{\lfloor \frac{n}{p} \rfloor}{\lfloor \frac{m}{p} \rfloor} \tbinom{n \bmod p}{m \bmod p} \bmod p=\tbinom{n/p}{m/p}\tbinom{n\%p}{m\%p} \bmod p$$  
+	\par 先预先求出$i! \;(i \in \left[0,p\right))$. 并利用费马小定理和快速幂乘求出每一个$i!$的逆元$(i!)^{-1}$。求$\tbinom{n}{m} \bmod p$，当$m=0$直接就是$1$.若$n,m$都在$p$范围内，则直接转化为$n! \times (m!)^{-1} \times [(n-m)!]^{-1}$.否则就是\textit{lucas定理}缩小规模。
+	\par {\bfseries 对一个固定的p，预处理求阶乘及快速模幂求其逆元，时间复杂度$O(p\log_2{p})$。空间复杂度$O(p)$。预处理之后，单次求$\tbinom{n}{m} \bmod p$复杂度$O(\log_{p}{m})$} 
+	\begin{lstlisting}[language={c++}]
+void prepare(ll p, vector<ll>&fac, vector<ll>&inv_fac) {
+	fac.resize(p); inv_fac.resize(p);
+	mod_sys mod;
+	mod.set_mod(p);
+	fac[0] = 1;
+	inv_fac[0] = 1;
+	for (int i = 1; i < p; ++i) {
+		fac[i] = (fac[i-1]*i)%p;
+		inv_fac[i] = mod.pow(fac[i], p-2); // 既然能枚举一遍，p*p不应该爆ll
+	}
+}
+
+// 输入预设0=<n,m<p
+inline ll combination(ll n, ll m, ll p, vector<ll>&fac, vector<ll>&inv_fac) {
+	if (n < m) return 0;
+	return fac[n]*inv_fac[m]%p*inv_fac[n-m]%p;
+}
+
+ll lucas(ll n, ll m, ll p, vector<ll>&fac, vector<ll>&inv_fac) {
+	if (n < m) return 0;
+	ll ans = 1;
+	while(true) {
+		if (m == 0) return ans;
+		if (n < p && m < p) return ans*combination(n,m,p,fac,inv_fac)%p;
+		ans = ans * combination(n%p,m%p,p,fac,inv_fac)%p;
+		n/=p; m/=p;
+	}
+}
+	\end{lstlisting}
+
+\subsection{拓展lucas的结论}
+\par $$\tbinom{n}{m} \equiv
+{
+	p^{k_1-k_2-k_3} \times b_1 \times {b_2}^{-1} \times {b_3}^{-1} 
+	\times c^{u_1-u_2-u_3} 
+	\times \frac{{k_1}!}{{k_2}! \times {k_3}!}
+} \pmod{p^w}$$.
+\begin{enumerate}
+	\item 当$r_1 \geq r_2$时，$k_1=k_2+k_3$,故上面这个式子最后分式的部分$\frac{{k_1}!}{{k_2}! \times {k_3}!}=\tbinom{k_1}{k_2}$.
+	\item 当$r_1 < r_2$时，$k_1=k_2+k_3+1$,最后的那个分式无法直接变成组合数，但是我们只需要分子分母同时乘以$k_1-k_2$，即可变成组合数。$\frac{{k_1}!}{{k_2}! \times {k_3}!}=(k_1-k_2) \times \tbinom{k_1}{k_2}$
+\end{enumerate}
+
+\par 各个字母代表的含义。
+\par 与n,m,n-m有关的量k,r,u,v分别用下标1,2,3区分.
+\par k,r是除以$p$的商与余数，u,v是除以模数$p^w$的商与余数。
+\par b是$n!$($m!$或$(n-m)!$)最后剩下的v个数中不是p的倍数的数的乘积。
+\par c是$\left[1,p^w\right]$中不是p的倍数的数的乘积。
+\par \textbf{从结论中的式子可以看到b,c我们只关注模$p^k$意义下的值，因此可以预先求出$[1..i]$中不是p的倍数的数的乘积$f(i)$(模$p^k$意义下的)。}
+\subsection{$\tbinom{n}{m} \bmod N$的求取}
+N是任意正整数。对$N$进行素数分解。$N=\prod\limits_{i=1}^{q}p_i^{k_i}$.
+对$\tbinom{n}{m} \bmod p_i^{k_i}$问题，可以通过上一小节的拓展lucas求得，记答案是$c_i$.
+于是得到了$q$个线性同余方程,即线性同余方程组$\tbinom{n}{m} \equiv c_i \pmod{p_i^{k_i}} \quad (1 \leq i \leq q)$.
+对于线性同余方程组，并且注意到模数$p_i^{k_i}$两两互质，可以用中国剩余定理（也可以用拓欧）解出其通解$x=x_0+kt$。并且由于模数互质，$k=lcm(p_i^{k_i})=N \quad (1 \leq i \leq q)$.所以在$[0,N)$内只有一个特解$x_0$,而这个特解就是$\tbinom{n}{m} \bmod N$.
+
+\begin{lstlisting}[language={c++}]
+ll pow(ll a, ll n)
+{   
+	if (n == 0) return 1;
+	// 始终维持要求的数可以表示为(a)^n*t
+	ll t = 1;
+	while (n > 1)
+	{
+		if (n&1) t = t*a;
+		n >>= 1; a = a*a;
+	}
+	return a*t; // now n = 1
+}
+
+// 极端情况下i*i会爆ll，要改成n开根号（效率低）
+// 质因数分解，p_i^{k_i} 共q项 返回q
+int factor(ll n, vector<ll>&p, vector<int>&k) {
+	p.clear(); k.clear();
+	if (n <= 1) return 0;
+	int q = 0;
+	for (ll i = 2; i*i <= n; ++i) {
+		if (!(n%i)) {
+			p.push_back(i);
+			k.push_back(0);
+			do {n /= i; ++k[q];} while (!(n%i));
+			++q;
+		}
+	}
+	if (n > 1) {
+		p.push_back(n);
+		k.push_back(1);
+		++q;
+	}
+	return q;
+}
+
+// 求C(n,m)%(p^k)
+const ll kMaxPk = 1000000;
+// f[i]表示1..i中不是p的倍数的数的乘积(%pk) inv_f则是相应的逆元
+ll f[kMaxPk],inv_f[kMaxPk];
+ll ex_lucas(ll n, ll m, ll p, ll k, ll pk) {
+	ll k1,k2,k3,r1,r2,r3,u1,u2,u3,v1,v2,v3;
+	ll ans = 1;
+	f[0] = 1; inv_f[0] = 1;
+	for (ll j = 1; j < pk; ++j) {
+		if (j%p) {
+			f[j] = (f[j-1]*j)%pk;
+			multiplicative_inverse(f[j],pk,inv_f[j]); // 肯定存在逆元
+		} else {
+			f[j] = f[j-1];
+			inv_f[j] = inv_f[j-1];
+		}
+	}
+	while(1) {
+		if (m == 0) return ans;
+		k1 = n/p, r1 = n%p;
+		k2 = m/p, r2 = m%p;
+		k3 = (n-m)/p, r3 = (n-m)%p;
+		u1 = n/pk, v1 = n%pk;
+		u2 = m/pk, v2 = m%pk;
+		u3 = (n-m)/pk, v3 = (n-m)%pk;
+		if (k1-k2-k3) { // == 1
+			ans = (ans*p)%pk;
+		} // else == 0
+		ans = (ans*f[v1])%pk;
+		ans = (ans*inv_f[v2])%pk;
+		ans = (ans*inv_f[v3])%pk;
+		if (u1-u2-u3) { // == 1
+			ans = (ans*f[pk-1])%pk;
+		} // else == 0
+		if (r1 < r2) ans = ans*((k1-k2)%pk)%pk;
+		n = k1; m = k2;
+	}
+}
+
+const int kMaxQ = 30;
+ll a[kMaxQ];
+ll c[kMaxQ];
+ll mm[kMaxQ];
+
+// 返回C(n,m)%N N的分解因式后最大的x=p^k
+// 可以开x大小的数组
+ll ex_lucas_N(ll n, ll m, ll N) {
+	vector<ll>p;
+	vector<int>k;
+	int q = factor(N,p,k);
+	for (int i = 0; i < q; ++i) {
+		a[i] = 1;
+		mm[i] = pow(p[i],k[i]);
+		c[i] = ex_lucas(n,m, p[i], k[i], mm[i]);
+	}
+	ll ans,kk;
+	linear_congruence_equations(q,a,c,mm,ans,kk);
+	return ans;
+}
+\end{lstlisting}

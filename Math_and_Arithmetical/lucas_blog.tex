@@ -1,0 +1,54 @@
+\section{lucas定理及其拓展的推导}
+\subsection{$\tbinom{n}{m} \bmod p^w$的求取}
+\par p是素数。主要是计算$\tbinom{n}{m} \bmod p^w$的值。
+\par 对于$\tbinom{n}{m} = \frac{n!}{m!(n-m)!}$.
+\par 对于$n!=1 \times 2 \times 3 \times \ldots \times n.$
+我们将这些数进行分组。假设$k=\lfloor \frac{n}{p} \rfloor,\, r = n \bmod p;\;u=\frac{n}{p^w},\, v=n \bmod {p^w}$
+\begin{enumerate}
+	\item 把所有p的倍数抽出来，组成一组，它们的乘积记为$A$，易得$A=\prod\limits_{i=1}^{k}(i \times p)=p^w \times k!$。
+	\item 剩下的数中,把在这个区间内$[up^w+1,up^w+v]$中的数分为一组，记乘积为$B$.由于每个数都不是$p$的倍数，则$B$与$p^w$互质,$B$关于$p^w$的逆元$B_{p^w}^{-1}$存在。
+	\item 剩下的每个数a,把$\lfloor \frac{a}{p^w} \rfloor$相同的数分在一组，并把$\lfloor \frac{a}{p^w} \rfloor$作为它们的组号。每一组的乘积分别记作$C_0,C_2,C_3,C_4,\ldots,C_{u-1}$。同理，显然$C_i$与$p^w$互质，逆元存在。另外，每一组的乘积关于$p^w$是同模的，因为每一组的元素都是$\left[p^wi+1,p^w(i+1)\right)$的所有元素中去掉了$p$的倍数。
+\end{enumerate}
+\par 于是$n!=AB\prod\limits_{i=0}^{u-1}C_i=p^w\times k! \times B\prod\limits_{i=0}^{u-1}C_i$.
+\par 回到原来组合数的问题，对于$n,m,n-m$依然有上面$k,r,u,v$的定义，只是分别用下标$1,2,3$区分。
+\par 于是$$\tbinom{n}{m} = \frac{n!}{m!(n-m)!} = \frac{p^{k_1-k_2-k_3}\times {k_1}! \times B_1 \times \prod\limits_{i=0}^{u_1-1}C_i}{{k_2}! \times {k_3}! \times B_2 \times B_3 \times \prod\limits_{i=0}^{u_2-1}C_i \times \prod\limits_{i=0}^{u_3-1}C_i}$$
+\par 注意到$k_1-k_2-k_3 \geq 0$,事实上，它只能取0或1.$B$系列，$C$系列都是与$p^w$互质的，而且$\frac{{k_1}!}{{k_2}! \times {k_3}!}$依旧是个整数，所以，可以直接把分母中$B$,$C$系列中的直接变成乘以逆元抹去。
+\par 假设$B_i \equiv b_i \pmod{p^w}$,$C_i \equiv c \pmod{p^w}$.$b,c \in \left[1,p^w\right)$.
+$$\frac{p^{k_1-k_2-k_3}\times {k_1}! \times B_1 \times \prod\limits_{i=0}^{u_1-1}C_i}{{k_2}! \times {k_3}! \times B_2 \times B_3 \times \prod\limits_{i=0}^{u_2-1}C_i \times \prod\limits_{i=0}^{u_3-1}C_i} \\ \equiv {
+	p^{k_1-k_2-k_3} \times b_1 \times {b_2}^{-1} \times {b_3}^{-1} 
+	\times c^{u_1}  \times (c^{-1})^{u_2} \times (c^{-1})^{u_3} 
+	\times \frac{{k_1}!}{{k_2}! \times {k_3}!}
+}\\ \equiv
+{
+	p^{k_1-k_2-k_3} \times b_1 \times {b_2}^{-1} \times {b_3}^{-1} 
+	\times c^{u_1-u_2-u_3} 
+	\times \frac{{k_1}!}{{k_2}! \times {k_3}!}
+} \pmod{p^w}$$.
+\begin{enumerate}
+	\item 当$r_1 \geq r_2$时，$k_1=k_2+k_3$,故上面这个式子最后分式的部分$\frac{{k_1}!}{{k_2}! \times {k_3}!}=\tbinom{k_1}{k_2}$.
+	\item 否则，$k_1=k_2+k_3+1$,最后的那个分式无法直接变成组合数，但是我们只需要分子分母同时乘以$k_1-k_2$，即可变成组合数。$\frac{{k_1}!}{{k_2}! \times {k_3}!}=(k_1-k_2) \times \tbinom{k_1}{k_2}$
+\end{enumerate}
+以上就是结论了，最后再次强调一下各个下标，字母代表的含义。
+\par \textbf{与n,m,n-m有关的量分别用下标1,2,3区分}。
+\par \textbf{k,r是除以$p$的商与余数，u,v是除以模数$p^w$的商与余数。}
+\par \textbf{b是最后剩下的v个数中不是p的倍数的数的乘积}。
+\par \textbf{c是$\left[1,p^w\right]$中不是p的倍数的数的乘积}。
+\subsubsection{lucas定理的推导}
+\textbf{特殊地，当$w=1$时，$k$和$u$,$r$和$v$是相同的。}
+故$b \equiv r! \pmod{p},\quad c \equiv (p-1)! \pmod{p}$，因此代入式子，可以得到lucas定理的结论。
+\begin{enumerate}
+	\item 当$r_1 \geq r_2$时，$k_1=k_2+k_3$,故上面最后的式子可以化为$ans \equiv {
+		{r_1}! \times ({r_2}!)^{-1} \times ({r_3}!)^{-1} \times \tbinom{k_1}{k_2} \pmod{p}
+	}
+	$
+	\item 否则，$k_1=k_2+k_3+1$,最后的那个分式无法直接变成组合数，但是我们只需要分子分母同时乘以$k_1-k_2$，即可变成组合数。$\frac{{k_1}!}{{k_2}! \times {k_3}!}=(k_1-k_2) \times \tbinom{k_1}{k_2}$。而$ans \equiv {
+		p \times {r_1}! \times ({r_2}!)^{-1} \times ({r_3}!)^{-1} \times c \times (k_1-k_2) \times \tbinom{k_1}{k_2}
+	} \equiv 0 \pmod{p}
+	$
+\end{enumerate}
+\subsection{$\tbinom{n}{m} \bmod N$的求取}
+N是任意正整数。对$N$进行素数分解。$N=\prod\limits_{i=1}^{q}p_i^{k_i}$.
+对$\tbinom{n}{m} \bmod p_i^{k_i}$问题，可以通过上一小节的拓展lucas求得，记答案是$c_i$.
+于是得到了$q$个线性同余方程,即线性同余方程组$\tbinom{n}{m} \equiv c_i \pmod{p_i^{k_i}} \quad (1 \leq i \leq q)$.
+对于线性同余方程组，并且注意到模数$p_i^{k_i}$两两互质，可以用中国剩余定理（也可以用拓欧）解出其通解$x=x_0+kt$。并且由于模数互质，$k=lcm(p_i^{k_i})=N \quad (1 \leq i \leq q)$.所以在$[0,N)$内只有一个特解$x_0$,而这个特解就是$\tbinom{n}{m} \bmod N$.
+\textbf{至此，组合数对任意数的取模我们都予以解决了。}
