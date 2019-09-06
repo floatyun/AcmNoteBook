@@ -1,4 +1,6 @@
-\section{欧拉函数}
+\section{欧拉相关}
+
+\subsection{欧拉函数}
 	\par $\phi(n)$表示1到n中与n互素的个数.
 	\par 公式 $\phi(n)=n\prod\limits_{p \mid n \& p \in P } 1-\frac{1}{p}$
 	\par $\phi(1..n)$总体求解可用线性筛$O(n)$求出.
@@ -47,3 +49,18 @@ void get_all_phi(int n, vector<int>& phi) {
 	}
 }
 \end{lstlisting}
+
+
+\subsection{欧拉定理及欧拉降幂公式}
+\large{欧拉定理} $$(a,m)=1 \Rightarrow a^{\phi(m)} \equiv 1 \pmod{m} \label{euler1}$$
+\par \large{广义欧拉降幂公式}
+\begin{equation*}
+	a^{B} = 
+	\begin{cases}
+		a^B                           &\text{if} B < \phi(m);\\
+		a^{B \bmod \phi(m) + \phi(m)} &\text{if} B \geq \phi(m) \& (a,m) \neq 1;\\
+		a^{B \bmod \phi(m)} &\text{if} B \geq \phi(m) \& (a,m) = 1;\\
+	\end{cases}
+\end{equation*}
+\par 其中第三种情况是可以使用第二种情况的式子，因为欧拉定理——\ref{euler1}。实际上，当模数与底数互素的时候，只需要指数对$\phi{m}$取模降幂即可。
+\par 模板略。

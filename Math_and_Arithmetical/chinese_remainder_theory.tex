@@ -1,0 +1,33 @@
+\subsection{中国剩余定理}
+\par \large{结论}
+\par 方程组$x \equiv c_i \pmod{m_i} \quad (i=1, 2, 3, \ldots, n)$.其中$m_i$\underline{\textbf{两两互质}}。
+\par 中国剩余定理是说，这样的线性同余方程组的通解是$x=x_0+Mt, \, t \in Z$.其中$M=\prod\limits_{i=1}^{n}m_i$,即所有模数的乘积；$$x_0={
+	\left(
+		\sum\limits_{i=1}^{n}
+		c_i M_i {M_i}_{m_i}^{-1} 
+	\right) \bmod M
+}$$.其中$M_i=\frac{M}{m_i}$，即$M_i$是除掉第$i$个模数$m_i$之外所有模数的积;${M_i}_{m_i}^{-1}$是$M_i$关于模数$m_i$的逆元。\textbf{显然模M意义下，解有且只有一个,即$x_0$。}
+\par 复杂度$O(n\log{val})$,对数来源于求逆元。
+\par \large{Code}
+\begin{lstlisting}[language={c++}]
+// m两两互质
+// 当模数是long long的时候，两个数相乘要用__int128
+// 当模数是__int128的时候，使用ex_gcd解线性同余方程组或者使用快速模乘防止爆__int128
+// x是模M范围内的唯一解
+bool chinese_remainder_theory(int n, ll c[], ll m[], ll &x, ll &k) {
+	ll &M = k;
+	ll Mi, inv_Mi;
+	__int128 t;
+	M = 1; x = 0;
+	for (int i= 0; i < n; ++i) M *= m[i];
+	for (int i = 0; i < n; ++i) {
+		Mi = M/m[i];
+		multiplicative_inverse(Mi,m[i],inv_Mi); // 肯定存在
+		t = c[i]%M;
+		t = t*Mi%M;
+		t = t*inv_Mi%M; // 防止爆long long
+		x = (x+(ll)t)%M;
+	}
+	return true;
+}
+\end{lstlisting}
