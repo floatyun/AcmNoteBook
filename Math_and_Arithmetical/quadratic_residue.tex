@@ -1,0 +1,99 @@
+\section{二次剩余}
+\par $p$是奇素数。所有的运算都是在群$Z_{p}^{*}$中的运算。方程$x^2=a \neq 0$问是否有解，以及解是什么?若有解，$a$就是模$p$的二次剩余；若无解，则$a$就是模$p$的非二次剩余。
+\begin{enumerate}
+	\item $a=0$,显然只有唯一解$x=0$.
+	\item $a\neq 0$,有解等价于$a^{\frac{p-1}{2}}=1$;无解等价于$a^{\frac{p-1}{2}}=-1$.
+\end{enumerate}
+\par 群$Z_{p}^{*}$恰好有一半的元素是二次剩余，一半的元素不是二次剩余。当元素$a$是二次剩余是，解有且只有两个$x_0,x_1$,且$x_0=-x_1$.
+\par 因此，验证$a$是否是二次剩余可以用快速模幂,复杂度$O(\log_2{p})$.
+\par 对于二次剩余$a$，求解x使用\underline{Cipolla}（洋葱? 奇波拉?）算法。
+\subsection{Cipolla洋葱算法}
+\par 这是一个随机性算法，复杂度是$O(\log_2{p})$
+\par {\bfseries 这个算法是在域$F_{p^2}$上进行运算的，在这个域上做乘法、幂运算，然后解的那个表达式算出来之后，一定是属于域$F_{p}$的，$F_{p^2}$是$F_{p}$的扩充。}
+\begin{enumerate}
+	\item 使用随机的方法，找到一个满足$b$满足$b^2-a$不是二次剩余。需要检验$b^2-a$是不是二次剩余的期望次数是$2$.每次检验是$O(\log_2{p})$.
+	\item 定义域$F_{p^2}$上的\textit{"虚部单位"}为$\omega$,其中$F_{p^2}={a+b\omega| a,b \in F_p}$,且$\omega^2=b^2-a$.
+	\item $x^2=a$的其中一个{\bfseries 解是$$x=(b+\omega)^{\frac{p+1}{2}}.$$}注意，虽然运算是$F_{p^2}$上的，但是右边的那个式子算出来的结果刚好是\textit{"虚部"}为0的元素。原因是$x^2=a \quad (x \in F_p)$与$x^2=(x_a+x_b\omega)^2=a+0\omega  \quad  (x \in F_{p^2},x_a,x_b \in F_p)$这两个方程都有且仅有两个解。而前面方程的解显然是后面两个方程的解，所以前面方程的解。所以前面这个方程和后面这个方程的解是完全一样的。而对于后面这个方程$x=(b+\omega)^{\frac{p+1}{2}}$代入后面的方程去验证(为了计算简洁，先证明了一些性质），会发现它的确是解，于是这个式子就是一开始方程的解。
+\end{enumerate}
+\par 下面为模板：
+\subsection{高效大范围随机数产生方法}
+\par 采用c++11的随机数生成法，更加简单，而且可以产生int或ll范围内的整数。而rand()只能产生16位short的整数，放大会有锯齿。
+\begin{lstlisting}[language={c++}]
+// 为了随机数
+random_device rd;
+mt19937_64 gen(rd()); // 64代表是64为，根据需要可以改小
+// uniform_int_distribution<> dis(1, n-1); //[1,n-1]均匀分布随机数 设置随机数范围
+// dis(gen) 返回一个随机数
+\end{lstlisting}
+
+\subsection{域$F_{p^2}$乘法与幂运算模板}
+\par 应当放在\textbf{mod\_sys(见快速乘幂)}的模板前面。
+\begin{lstlisting}[language={c++}]
+	// 二次剩余模板，注意，各个函数都假设p^2即mod^2不会爆ll
+	// 域F_p的拓展域F_{p^2}
+	struct F_p2_node{ll a,b;}; // F_p2_node所有的运算都应该通过F_p2_sys来管理调用。
+	// 预设所有传入参数都是合法的。
+	struct F_p2_sys{
+		ll p,w2;
+		typedef F_p2_node nd;
+		nd mlt(const nd&x, const nd&y) const {
+			nd ans;
+			//(x.a+x.bw)(y.a+y.bw)
+			ans.a = (x.a*y.a%p+x.b*y.b%p*w2%p)%p;
+			ans.b = (x.b*y.a%p+x.a*y.b%p)%p;
+			return ans;
+		}
+		// pre n>=0 非递归版 不可改成引用！
+		nd pow(nd a, ll n) const {
+			if (n == 0) {return nd{1,0};}
+			// 始终维持要求的数可以表示为(a)^n*t
+			nd t{1,0};
+			while (n > 1)
+			{
+				if (n&1) t = mlt(t,a);
+				n >>= 1; a = mlt(a,a);
+			}
+			return mlt(t,a);
+		}
+	};
+\end{lstlisting}
+\subsection{Cipolla洋葱算法实现模板}
+\textbf{需要使用先用快速乘幂的模板中的mod\_sys,实际上，这个模板只是给那个mod\_sys增加了成员函数。}
+\begin{lstlisting}[language={c++}]
+struct mod_sys{
+	// template code from 快速乘幂 见前面章节
+	some code....
+
+	// 预设a \not\equiv 0 (mod mod) 返回a是否是二次剩余
+	// 预设mod是奇素数
+	// 预设p^2不会爆long long，使用pow 若爆则改用pow_v2或者__int128
+	bool is_quadratic_residue(ll a) {
+		return 1 == pow(a,mod-1>>1);
+	}
+
+	// 解方程x^2 = a (mod mod)  p = mod 是奇质数
+	// 返回是否有解。如果有x0,x1(x0<=x1)存储解 仅解是0的时候取等号
+	// 洋葱算法。
+	// 预设p^2不会爆long long，使用pow 若爆则改用pow_v2或者__int128
+	bool sqrt(ll a,ll& x0, ll& x1) { // 需要一个随机数生成器
+		a = to_std(a);
+		if (a == 0) {x0 = x1 = 0; return true;}
+		if (!is_quadratic_residue(a)) return false;
+		uniform_int_distribution<> dis(1, mod-1);
+		ll b,w2;
+		while(true) {
+			b = dis(gen);
+			w2 = to_std((b*b)%mod-a);
+			if (!is_quadratic_residue(w2)) break;
+		}
+		// x = (b+w)^{(p+1)/2}
+		F_p2_sys fp2{mod,w2}; // p,w2
+		F_p2_node t{b,1}; // a,b(means a+bw)
+		auto x = fp2.pow(t,mod+1>>1);
+		x0 = to_std(x.a); // assert(x.b==0);
+		x1 = mod-x.a;
+		if (x0 > x1) swap(x0,x1);
+		return true;
+	}
+};
+\end{lstlisting}
